@@ -10,7 +10,6 @@ public class DatabaseService
         {
             books[i] = new Book()
             {
-                Id = i,
                 Author = "Author_" + i.ToString(),
                 Title = "Title_" + i.ToString(),
                 Content = "Lorem ipsum repeat hundreds times more...",
