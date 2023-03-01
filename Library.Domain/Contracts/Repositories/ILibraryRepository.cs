@@ -9,7 +9,7 @@ public interface ILibraryRepository
     Task DeleteBookAsync(int id);
     Task<int> CreateReviewAsync(Review review);
     Task AddRatingAsync(Rating rating);
-    Task<ICollection<Book>> GetAllBooksAsync(OrderByProperty? orderBy);
+    Task<ICollection<Book>> GetAllBooksAsync(OrderByProperty orderBy);
     Task<ICollection<Book>> GetRecommendedAsync(string? genre);
-    Task<Book> GetBookByIdAsync(int bookId);
+    Task<Book?> GetBookByIdAsync(int bookId);
 }
