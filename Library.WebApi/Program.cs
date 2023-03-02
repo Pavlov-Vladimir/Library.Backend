@@ -1,12 +1,12 @@
-using Library.Business;
-using Library.DataAccess;
-
 var builder = WebApplication.CreateBuilder(args);
+
 var services = builder.Services;
 
 // Add services to the container.
 services.AddPersistence();
 services.AddDataProvidersAndServices();
+services.AddAutoMapper(typeof(Program).Assembly);
+services.AddValidators();
 
 services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
