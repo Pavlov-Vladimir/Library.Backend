@@ -1,4 +1,5 @@
-﻿using Library.Domain.Contracts.Services;
+﻿using Library.Domain.Contracts.Repositories;
+using Library.Domain.Contracts.Services;
 using Library.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -9,28 +10,35 @@ using System.Threading.Tasks;
 namespace Library.Business.Services;
 public class LibraryService : ILibraryService
 {
-    public Task<int> AddBookAsync(Book book)
+    private readonly ILibraryRepository _repository;
+
+    public LibraryService(ILibraryRepository repository)
     {
-        throw new NotImplementedException();
+        _repository = repository;
     }
 
-    public Task AddRatingAsync(Rating rating)
+    public async Task<int> AddBookAsync(Book book)
     {
-        throw new NotImplementedException();
+        return await _repository.CreateBookAsync(book);
     }
 
-    public Task<int> AddReviewAsync(Review review)
+    public async Task AddRatingAsync(Rating rating)
     {
-        throw new NotImplementedException();
+        await _repository.AddRatingAsync(rating);
     }
 
-    public Task DeleteBookAsync(int id)
+    public async Task<int> AddReviewAsync(Review review)
     {
-        throw new NotImplementedException();
+        return await _repository.CreateReviewAsync(review);
     }
 
-    public Task<int> UpdateBookAsync(Book book)
+    public async Task DeleteBookAsync(int id)
     {
-        throw new NotImplementedException();
+        await _repository.DeleteBookAsync(id);
+    }
+
+    public async Task<int> UpdateBookAsync(Book book)
+    {
+        return await _repository.UpdateBookAsync(book);
     }
 }

@@ -1,27 +1,30 @@
 ﻿using Library.Domain.Common.Enums;
 using Library.Domain.Contracts.DataProviders;
+using Library.Domain.Contracts.Repositories;
 using Library.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Library.Business.DataProviders;
 public class LibraryDataProvider : ILibraryDataProvider
 {
-    public Task<Book> GetBookByIdAsync(int bookId)
+    private readonly ILibraryRepository _repository;
+
+    public LibraryDataProvider(ILibraryRepository repository)
     {
-        throw new NotImplementedException();
+        _repository = repository;
     }
 
-    public Task<ICollection<Book>> GetBooksAsync(OrderByProperty? orderBy)
+    public async Task<Book?> GetBookByIdAsync(int bookId)
     {
-        throw new NotImplementedException();
+        return await _repository.GetBookByIdAsync(bookId);
     }
 
-    public Task<ICollection<Book>> GetRecommendedAsync(string? genre)
+    public async Task<ICollection<Book>> GetBooksAsync(OrderByProperty orderBy)
     {
-        throw new NotImplementedException();
+        return await _repository.GetAllBooksAsync(orderBy);
+    }
+
+    public async Task<ICollection<Book>> GetRecommendedAsync(string? genre)
+    {
+        return await _repository.GetRecommendedAsync(genre);
     }
 }

@@ -29,8 +29,14 @@ public class LibraryRepository : ILibraryRepository
 
         await _context.Books.AddAsync(book);
         await _context.SaveChangesAsync();
+        var bookId = await _context.Books.MaxAsync(b => b.Id);
+        //var saved = await _context.Books
+        //    .FirstAsync(s => s.Author == book.Author
+        //                    && s.Genre == book.Genre
+        //                    && s.Title == book.Title
+        //                    && s.Content.Length == book.Content.Length);
 
-        return await Task.FromResult(book.Id);
+        return await Task.FromResult(bookId);
     }
 
     public async Task<int> CreateReviewAsync(Review review)
@@ -40,8 +46,9 @@ public class LibraryRepository : ILibraryRepository
 
         await _context.Reviews.AddAsync(review);
         await _context.SaveChangesAsync();
+        var reviewId = await _context.Reviews.MaxAsync(r => r.Id);
 
-        return await Task.FromResult(review.Id);
+        return await Task.FromResult(reviewId);
     }
 
     public async Task DeleteBookAsync(int id)
