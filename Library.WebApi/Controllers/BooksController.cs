@@ -1,9 +1,6 @@
-﻿using FluentValidation;
-using Library.Domain.Common.Enums;
+﻿using Library.Domain.Common.Enums;
 using Library.Domain.Contracts.DataProviders;
 using Library.Domain.Contracts.Services;
-using Library.Domain.Models;
-using Library.WebApi.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.WebApi.Controllers;
@@ -41,7 +38,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
-    [Route("recommended")]
+    [Route("/api/recommended")]
     public async Task<IActionResult> GetRecommended([FromQuery] string? genre = null)
     {
         var books = await _dataProvider.GetRecommendedAsync(genre);
@@ -54,7 +51,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
-    [Route("{id}")]
+    [Route("{id:int}")]
     public async Task<IActionResult> GetBookById([FromRoute] int id)
     {
         var book = await _dataProvider.GetBookByIdAsync(id);
@@ -69,7 +66,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("{id}")]
+    [Route("{id:int}")]
     public async Task<IActionResult> DeleteBook([FromRoute] int id, [FromQuery] string key)
     {
         var book = await _dataProvider.GetBookByIdAsync(id);
@@ -78,10 +75,10 @@ public class BooksController : ControllerBase
 
         var config = HttpContext.RequestServices.GetService<IConfiguration>();
         var secretKey = config?["SecretKey"];
-        if (secretKey == key)
-        {
-            await _service.DeleteBookAsync(id);
-        }
+        if (key != secretKey)
+            return BadRequest();
+
+        await _service.DeleteBookAsync(id);
         return NoContent();
     }
 
@@ -106,14 +103,14 @@ public class BooksController : ControllerBase
         if (book.Id == default)
         {
             var bookId = await _service.AddBookAsync(book);
-            return Created("id", bookId);
+            return Created("id", new { id = bookId });
         }
         await _service.UpdateBookAsync(book);
         return Ok(new { id = book.Id });
     }
 
     [HttpPut]
-    [Route("{id}/review")]
+    [Route("{id:int}/review")]
     public async Task<IActionResult> SaveReview([FromRoute] int id, [FromBody] ReviewDto dto)
     {
         if (dto == null)
@@ -135,7 +132,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpPut]
-    [Route("{id}/rate")]
+    [Route("{id:int}/rate")]
     public async Task<IActionResult> AddRate([FromRoute] int id, [FromBody] RatingDto dto)
     {
         if (dto == null)

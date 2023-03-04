@@ -8,10 +8,11 @@ public class DatabaseService
         Book[] books = new Book[10];
         for (int i = 0; i < books.Length; i++)
         {
+            int index = i + 1;
             books[i] = new Book()
             {
-                Author = "Author_" + i.ToString(),
-                Title = "Title_" + i.ToString(),
+                Author = "Author_" + index.ToString(),
+                Title = "Title_" + index.ToString(),
                 Content = "Lorem ipsum repeat hundreds times more...",
                 Genre = i < 5 ? "horror" : "humor"
             };

@@ -11,11 +11,11 @@ public class BookMapperProfile : Profile
 
         CreateMap<Book, DetailsBookDto>()
             .ForMember(dto => dto.Rating, opt =>
-                opt.MapFrom(book => book.Ratings.Average(r => r.Score)));
+                opt.MapFrom(book => book.Ratings.Select(r => r.Score).DefaultIfEmpty(0).Average()));
 
         CreateMap<Book, GetBookDto>()
             .ForMember(dto => dto.Rating, opt =>
-                opt.MapFrom(book => book.Ratings.Average(r => r.Score)))
+                opt.MapFrom(book => book.Ratings.Select(r => r.Score).DefaultIfEmpty(0).Average()))
             .ForMember(dto => dto.ReviewsNumber, opt =>
                 opt.MapFrom(book => book.Reviews.Count));
     }

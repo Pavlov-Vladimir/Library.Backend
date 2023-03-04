@@ -27,16 +27,11 @@ public class LibraryRepository : ILibraryRepository
         if (book == null)
             return await Task.FromResult(-1);
 
+        var bookEntry = _context.Entry<Book>(book);
         await _context.Books.AddAsync(book);
         await _context.SaveChangesAsync();
-        var bookId = await _context.Books.MaxAsync(b => b.Id);
-        //var saved = await _context.Books
-        //    .FirstAsync(s => s.Author == book.Author
-        //                    && s.Genre == book.Genre
-        //                    && s.Title == book.Title
-        //                    && s.Content.Length == book.Content.Length);
 
-        return await Task.FromResult(bookId);
+        return await Task.FromResult(bookEntry.Entity.Id);
     }
 
     public async Task<int> CreateReviewAsync(Review review)
@@ -44,11 +39,11 @@ public class LibraryRepository : ILibraryRepository
         if (review == null)
             return await Task.FromResult(-1);
 
+        var reviewEntry = _context.Entry<Review>(review);
         await _context.Reviews.AddAsync(review);
         await _context.SaveChangesAsync();
-        var reviewId = await _context.Reviews.MaxAsync(r => r.Id);
 
-        return await Task.FromResult(reviewId);
+        return await Task.FromResult(reviewEntry.Entity.Id);
     }
 
     public async Task DeleteBookAsync(int id)
@@ -63,10 +58,11 @@ public class LibraryRepository : ILibraryRepository
 
     public async Task<ICollection<Book>> GetAllBooksAsync(OrderByProperty orderBy = OrderByProperty.Title)
     {
+        var books = _context.Books.Include(b => b.Reviews).Include(b => b.Ratings);
         return orderBy switch
         {
-            OrderByProperty.Author => await _context.Books.OrderBy(b => b.Author).ToListAsync(),
-            OrderByProperty.Title => await _context.Books.OrderBy(b => b.Title).ToListAsync(),
+            OrderByProperty.Author => await books.OrderBy(b => b.Author).ToListAsync(),
+            OrderByProperty.Title => await books.OrderBy(b => b.Title).ToListAsync(),
             _ => throw new ArgumentException("Invalid sort parameter.")
         };
     }
@@ -81,19 +77,23 @@ public class LibraryRepository : ILibraryRepository
 
     public async Task<ICollection<Book>> GetRecommendedAsync(string? genre = null)
     {
-        if (genre == null)
-            return await _context.Books
-                .Include(b => b.Ratings)
-                .OrderBy(b => b.Ratings.Average(r => r.Score))
-                .Take(10)
-                .ToListAsync();
-
-        return await _context.Books
-            .Where(b => b.Genre.ToLower().Contains(genre.ToLower()))
+        var query = _context.Books.AsQueryable();
+        if (genre != null)
+        {
+            query = query.Where(b => b.Genre.ToLower().Contains(genre.ToLower()));
+        }
+        var books = await query
+            .Include(b => b.Reviews)
             .Include(b => b.Ratings)
-            .OrderBy(b => b.Ratings.Average(r => r.Score))
-            .Take(10)
             .ToListAsync();
+
+        return books
+            .OrderByDescending(b => b.Ratings
+                .Select(r => r.Score)
+                .DefaultIfEmpty(0)
+                .Average())
+            .Take(10)
+            .ToList();
     }
 
     public async Task<int> UpdateBookAsync(Book book)
