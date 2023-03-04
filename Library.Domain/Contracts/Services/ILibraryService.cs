@@ -3,9 +3,9 @@
 namespace Library.Domain.Contracts.Services;
 public interface ILibraryService
 {
-    Task<int> AddBook(Book book);
-    Task<int> UpdateBook(Book book);
-    Task DeleteBook(int id);
-    Task<int> AddReview(Review review);
-    Task AddRating(Rating rating);
+    Task<int> AddBookAsync(Book book);
+    Task<int> UpdateBookAsync(Book book);
+    Task DeleteBookAsync(int id);
+    Task<int> AddReviewAsync(Review review);
+    Task AddRatingAsync(Rating rating);
 }
