@@ -77,12 +77,8 @@ public class LibraryRepository : ILibraryRepository
 
     public async Task<ICollection<Book>> GetRecommendedAsync(string? genre = null)
     {
-        var query = _context.Books.AsQueryable();
-        if (genre != null)
-        {
-            query = query.Where(b => b.Genre.ToLower().Contains(genre.ToLower()));
-        }
-        var books = await query
+        var books = await _context.Books
+            .Where(b => genre == null || b.Genre.ToLower().Contains(genre.ToLower()))
             .Include(b => b.Reviews)
             .Include(b => b.Ratings)
             .ToListAsync();
@@ -94,6 +90,21 @@ public class LibraryRepository : ILibraryRepository
                 .Average())
             .Take(10)
             .ToList();
+
+        // This query doesn't work as IQueryable !???
+        //var books = await _context.Books
+        //    .Where(b => genre == null || b.Genre.ToLower().Contains(genre.ToLower()))
+        //    .Include(b => b.Reviews)
+        //        .ThenInclude(r => r.Book)
+        //    .Include(b => b.Ratings)
+        //        .ThenInclude(r => r.Book)
+        //    .OrderByDescending(b => b.Ratings
+        //        .Select(r => r.Score)
+        //        .DefaultIfEmpty(0)
+        //        .Average())
+        //    .Take(10)
+        //    .ToListAsync();
+        //return books;
     }
 
     public async Task<int> UpdateBookAsync(Book book)

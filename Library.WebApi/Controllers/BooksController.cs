@@ -11,7 +11,7 @@ namespace Library.WebApi.Controllers;
 public class BooksController : ControllerBase
 {
     private readonly ILibraryDataProvider _dataProvider;
-    private readonly ILibraryService _service;
+    private readonly ILibraryService _libraryService;
     private readonly IMapper _mapper;
 
     public BooksController(ILibraryDataProvider dataProvider,
@@ -19,7 +19,7 @@ public class BooksController : ControllerBase
                            IMapper mapper)
     {
         _dataProvider = dataProvider;
-        _service = service;
+        _libraryService = service;
         _mapper = mapper;
     }
 
@@ -29,7 +29,7 @@ public class BooksController : ControllerBase
         var books = Enum.TryParse<OrderByProperty>(order, true, out OrderByProperty orderBy)
             ? await _dataProvider.GetBooksAsync(orderBy)
             : await _dataProvider.GetBooksAsync();
-
+        
         var bookDtos = _mapper.Map<List<GetBookDto>>(books);
         if (bookDtos == null)
             return StatusCode(500);
@@ -78,7 +78,7 @@ public class BooksController : ControllerBase
         if (key != secretKey)
             return BadRequest();
 
-        await _service.DeleteBookAsync(id);
+        await _libraryService.DeleteBookAsync(id);
         return NoContent();
     }
 
@@ -102,10 +102,10 @@ public class BooksController : ControllerBase
 
         if (book.Id == default)
         {
-            var bookId = await _service.AddBookAsync(book);
+            var bookId = await _libraryService.AddBookAsync(book);
             return Created("id", new { id = bookId });
         }
-        await _service.UpdateBookAsync(book);
+        await _libraryService.UpdateBookAsync(book);
         return Ok(new { id = book.Id });
     }
 
@@ -127,7 +127,7 @@ public class BooksController : ControllerBase
         if (review == null)
             return StatusCode(500);
 
-        var reviewId = await _service.AddReviewAsync(review);
+        var reviewId = await _libraryService.AddReviewAsync(review);
         return Ok(new { id = reviewId });
     }
 
@@ -149,7 +149,7 @@ public class BooksController : ControllerBase
         if (rating == null)
             return StatusCode(500);
 
-        await _service.AddRatingAsync(rating);
+        await _libraryService.AddRatingAsync(rating);
         return Ok();
     }
 }
