@@ -8,6 +8,16 @@ services.AddDataProvidersAndServices();
 services.AddAutoMapper(typeof(Program).Assembly);
 services.AddValidators();
 
+services.AddHttpLogging(options =>
+{
+    options.LoggingFields = HttpLoggingFields.RequestMethod |
+        HttpLoggingFields.RequestHeaders |
+        HttpLoggingFields.RequestQuery |
+        HttpLoggingFields.RequestBody |
+        HttpLoggingFields.ResponseStatusCode;
+    //options.MediaTypeOptions.AddText("application/javascript");
+});
+
 services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
@@ -36,7 +46,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpLogging();
+app.UseCustomExceptionHandler();
+
 app.UseHttpsRedirection();
+
 
 app.UseAuthorization();
 

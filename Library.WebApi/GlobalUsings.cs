@@ -1,8 +1,10 @@
-﻿global using Library.Business;
-global using Library.DataAccess;
+﻿global using AutoMapper;
 global using FluentValidation;
-global using Library.WebApi.DTOs;
-global using AutoMapper;
+global using Library.Business;
+global using Library.DataAccess;
 global using Library.Domain.Models;
+global using Library.WebApi.DTOs;
 global using Library.WebApi.Mapping.Resolvers;
+global using Library.WebApi.Middlewares.ExceptionMiddleware;
 global using Library.WebApi.Validation;
+global using Microsoft.AspNetCore.HttpLogging;
