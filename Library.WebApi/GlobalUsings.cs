@@ -2,9 +2,15 @@
 global using FluentValidation;
 global using Library.Business;
 global using Library.DataAccess;
+global using Library.Domain.Common.Enums;
+global using Library.Domain.Contracts.DataProviders;
+global using Library.Domain.Contracts.Services;
 global using Library.Domain.Models;
 global using Library.WebApi.DTOs;
+global using Library.WebApi.Filters;
 global using Library.WebApi.Mapping.Resolvers;
 global using Library.WebApi.Middlewares.ExceptionMiddleware;
 global using Library.WebApi.Validation;
 global using Microsoft.AspNetCore.HttpLogging;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Mvc.Filters;

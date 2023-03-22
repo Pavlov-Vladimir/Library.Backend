@@ -1,3 +1,5 @@
+using Library.WebApi.Filters;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
@@ -19,6 +21,9 @@ services.AddHttpLogging(options =>
 });
 
 services.AddControllers();
+
+services.AddScoped<CheckIfExistsAttribute>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
