@@ -1,9 +1,4 @@
-﻿using Library.Domain.Common.Enums;
-using Library.Domain.Contracts.DataProviders;
-using Library.Domain.Contracts.Services;
-using Microsoft.AspNetCore.Mvc;
-
-namespace Library.WebApi.Controllers;
+﻿namespace Library.WebApi.Controllers;
 
 [Produces("application/json")]
 [Route("api/[controller]")]
@@ -29,7 +24,7 @@ public class BooksController : ControllerBase
         var books = Enum.TryParse<OrderByProperty>(order, true, out OrderByProperty orderBy)
             ? await _dataProvider.GetBooksAsync(orderBy)
             : await _dataProvider.GetBooksAsync();
-        
+
         var bookDtos = _mapper.Map<List<GetBookDto>>(books);
         if (bookDtos == null)
             return StatusCode(500);
@@ -52,13 +47,10 @@ public class BooksController : ControllerBase
 
     [HttpGet]
     [Route("{id:int}")]
-    public async Task<IActionResult> GetBookById([FromRoute] int id)
+    [ServiceFilter(typeof(CheckIfExistsAttribute))]
+    public IActionResult GetBookById()
     {
-        var book = await _dataProvider.GetBookByIdAsync(id);
-        if (book == null)
-            return NotFound();
-
-        var bookDto = _mapper.Map<DetailsBookDto>(book);
+        var bookDto = _mapper.Map<DetailsBookDto>(HttpContext.Items["book"] as Book);
         if (bookDto == null)
             return StatusCode(500);
 
@@ -67,12 +59,9 @@ public class BooksController : ControllerBase
 
     [HttpDelete]
     [Route("{id:int}")]
+    [ServiceFilter(typeof(CheckIfExistsAttribute))]
     public async Task<IActionResult> DeleteBook([FromRoute] int id, [FromQuery] string key)
     {
-        var book = await _dataProvider.GetBookByIdAsync(id);
-        if (book == null)
-            return NotFound();
-
         var config = HttpContext.RequestServices.GetService<IConfiguration>();
         var secretKey = config?["SecretKey"];
         if (key != secretKey)
@@ -84,18 +73,9 @@ public class BooksController : ControllerBase
 
     [HttpPost]
     [Route("save")]
+    [ValidateModel<BookDto>]
     public async Task<IActionResult> SaveBook([FromBody] BookDto dto)
     {
-        if (dto == null)
-            return BadRequest();
-
-        var validator = HttpContext.RequestServices.GetService<IValidator<BookDto>>();
-        if (validator == null)
-            return StatusCode(500);
-
-        if (!validator.Validate(dto).IsValid)
-            return BadRequest();
-
         var book = _mapper.Map<Book>(dto);
         if (book == null)
             return StatusCode(500);
@@ -111,18 +91,9 @@ public class BooksController : ControllerBase
 
     [HttpPut]
     [Route("{id:int}/review")]
+    [ValidateModel<ReviewDto>]
     public async Task<IActionResult> SaveReview([FromRoute] int id, [FromBody] ReviewDto dto)
     {
-        if (dto == null)
-            return BadRequest();
-
-        var validator = HttpContext.RequestServices.GetService<IValidator<ReviewDto>>();
-        if (validator == null)
-            return StatusCode(500);
-
-        if (!validator.Validate(dto).IsValid)
-            return BadRequest();
-
         var review = _mapper.Map<Review>(dto, opt => opt.Items["BookId"] = id);
         if (review == null)
             return StatusCode(500);
@@ -133,18 +104,9 @@ public class BooksController : ControllerBase
 
     [HttpPut]
     [Route("{id:int}/rate")]
+    [ValidateModel<RatingDto>]
     public async Task<IActionResult> AddRate([FromRoute] int id, [FromBody] RatingDto dto)
     {
-        if (dto == null)
-            return BadRequest();
-
-        var validator = HttpContext.RequestServices.GetService<IValidator<RatingDto>>();
-        if (validator == null)
-            return StatusCode(500);
-
-        if (!validator.Validate(dto).IsValid)
-            return BadRequest();
-
         var rating = _mapper.Map<Rating>(dto, opt => opt.Items["BookId"] = id);
         if (rating == null)
             return StatusCode(500);
