@@ -1,5 +1,3 @@
-using Library.WebApi.Filters;
-
 var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
@@ -27,6 +25,16 @@ services.AddScoped<CheckIfExistsAttribute>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
+
+services.AddCors(options =>
+{
+	options.AddPolicy("LibCors1", policy =>
+	{
+		policy.WithOrigins(["http://localhost:5173", "http://localhost:5174"]);
+		policy.AllowAnyHeader();
+		policy.AllowAnyMethod();
+	});
+});
 
 var app = builder.Build();
 
@@ -56,6 +64,7 @@ app.UseCustomExceptionHandler();
 
 app.UseHttpsRedirection();
 
+app.UseCors("LibCors1");
 
 app.UseAuthorization();
 
