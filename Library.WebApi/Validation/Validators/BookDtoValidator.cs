@@ -1,4 +1,6 @@
-﻿namespace Library.WebApi.Validation.Validators;
+﻿using System.Text.RegularExpressions;
+
+namespace Library.WebApi.Validation.Validators;
 
 public class BookDtoValidator : AbstractValidator<BookDto>
 {
@@ -16,10 +18,16 @@ public class BookDtoValidator : AbstractValidator<BookDto>
         RuleFor(dto => dto.Content).NotEmpty()
             .WithMessage("The Content is required");
 
-        RuleFor(dto => dto.Cover).Must(c => string.IsNullOrEmpty(c) || c.EndsWith("="))
+        RuleFor(dto => dto.Cover).Must(c => string.IsNullOrEmpty(c) || IsBase64String(c))
             .WithMessage("Wrong data format for Cover");
 
         RuleFor(dto => dto.Genre).NotEmpty().Length(1, 50)
             .WithMessage("The Genre is required and length must be less then 50");
+    }
+
+    private bool IsBase64String(string base64)
+    {
+        var base64Regex = new Regex(@"^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$");
+        return base64Regex.IsMatch(base64.Split(',')[1]);
     }
 }

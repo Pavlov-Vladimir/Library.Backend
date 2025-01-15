@@ -30,7 +30,7 @@ services.AddCors(options =>
 {
 	options.AddPolicy("LibCors1", policy =>
 	{
-		policy.WithOrigins(["http://localhost:5173", "http://localhost:5174"]);
+		policy.WithOrigins("http://localhost:5173", "http://localhost:5174");
 		policy.AllowAnyHeader();
 		policy.AllowAnyMethod();
 	});

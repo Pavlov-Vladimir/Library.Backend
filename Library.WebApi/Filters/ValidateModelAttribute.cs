@@ -17,8 +17,8 @@ public class ValidateModelAttribute<T> : Attribute, IActionFilter where T : clas
         {
             context.Result = new ObjectResult($"Validator for type {nameof(T)} is not exists")
             {
-            StatusCode = 500
-        };
+                StatusCode = 500
+            };
             return;
         }
 
