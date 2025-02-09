@@ -6,6 +6,7 @@ public class DetailsBookDto
     public string Title { get; set; } = null!;
     public string Author { get; set; } = null!;
     public string? Cover { get; set; }
+    public string Genre { get; set; } = null!;
     public string Content { get; set; } = null!;
     public decimal Rating { get; set; }
     public List<DetailsReviewDto> Reviews { get; set; } = new List<DetailsReviewDto>();

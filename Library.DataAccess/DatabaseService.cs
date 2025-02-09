@@ -5,6 +5,11 @@ public class DatabaseService
 {
     public static void Seed(ApplicationDbContext context)
     {
+        if (context.Books.Any())
+        {
+            return;
+        }
+        
         Random random = new Random();
         Book[] books = new Book[21];
         for (int i = 0; i < books.Length; i++)

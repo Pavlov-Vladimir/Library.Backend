@@ -1,9 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
+var configuration = builder.Configuration;
 
 // Add services to the container.
-services.AddPersistence();
+services.AddPersistence(configuration);
 services.AddDataProvidersAndServices();
 services.AddAutoMapper(typeof(Program).Assembly);
 services.AddValidators();
@@ -44,6 +47,7 @@ using (IServiceScope scope = app.Services.CreateScope())
 	try
 	{
 		var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+		context.Database.Migrate();
 		DatabaseService.Seed(context);
 	}
 	catch (Exception ex)
