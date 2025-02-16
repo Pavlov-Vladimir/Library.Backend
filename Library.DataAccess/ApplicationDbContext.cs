@@ -36,7 +36,7 @@ public class ApplicationDbContext : DbContext
         builder.HasIndex(r => r.Id).IsUnique();
         builder.Property(r => r.Score).IsRequired();
         builder.HasOne(r => r.Book).WithMany(b => b.Ratings)
-            .IsRequired().OnDelete(DeleteBehavior.NoAction).HasForeignKey("BookId");
+            .IsRequired().OnDelete(DeleteBehavior.Cascade).HasForeignKey("BookId");
     }
 
     private void ReviewConfigure(EntityTypeBuilder<Review> builder)
@@ -46,6 +46,6 @@ public class ApplicationDbContext : DbContext
         builder.Property(r => r.Reviewer).IsRequired().HasMaxLength(50);
         builder.Property(r => r.Message).IsRequired();
         builder.HasOne(r => r.Book).WithMany(b => b.Reviews)
-            .IsRequired().OnDelete(DeleteBehavior.NoAction).HasForeignKey("BookId");
+            .IsRequired().OnDelete(DeleteBehavior.Cascade).HasForeignKey("BookId");
     }
 }
