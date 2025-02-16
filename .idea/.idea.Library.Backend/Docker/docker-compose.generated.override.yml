@@ -1,0 +1,20 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  webapi:
+    build:
+      context: "C:\\Users\\boba7\\source\\repos\\Library.Backend"
+      dockerfile: "Library.WebApi/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net6.0/Library.WebApi.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "library.webapi:dev"
+    ports: []
+    volumes:
+    - "C:\\Users\\boba7\\source\\repos\\Library.Backend\\Library.WebApi:/app:rw"
+    - "C:\\Users\\boba7\\source\\repos\\Library.Backend:/src:rw"
+    - "C:\\Users\\boba7\\.nuget\\packages:/root/.nuget/packages"
+    working_dir: "/app"

@@ -58,7 +58,11 @@ public class LibraryRepository : ILibraryRepository
 
     public async Task<ICollection<Book>> GetAllBooksAsync(OrderByProperty orderBy = OrderByProperty.Title)
     {
-        var books = _context.Books.Include(b => b.Reviews).Include(b => b.Ratings);
+        var books = _context.Books
+            .Include(b => b.Reviews)
+            .Include(b => b.Ratings)
+            .AsSplitQuery();
+
         return orderBy switch
         {
             OrderByProperty.Author => await books.OrderBy(b => b.Author).ToListAsync(),
@@ -72,7 +76,8 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Books
             .Include(b => b.Reviews)
             .Include(b => b.Ratings)
-            .SingleOrDefaultAsync(x => x.Id == bookId);
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(x => x.Id == bookId);
     }
 
     public async Task<ICollection<Book>> GetRecommendedAsync(string? genre = null)
@@ -81,6 +86,7 @@ public class LibraryRepository : ILibraryRepository
             .Where(b => genre == null || b.Genre.ToLower().Contains(genre.ToLower()))
             .Include(b => b.Reviews)
             .Include(b => b.Ratings)
+            .AsSplitQuery()
             .ToListAsync();
 
         return books

@@ -1,7 +1,7 @@
 ﻿namespace Library.WebApi.Filters;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class CheckIfExistsAttribute : Attribute, IActionFilter
+public class CheckIfExistsAttribute : ActionFilterAttribute
 {
     private readonly ILibraryDataProvider _dataProvider;
 
@@ -10,7 +10,7 @@ public class CheckIfExistsAttribute : Attribute, IActionFilter
         _dataProvider = dataProvider;
     }
 
-    public async void OnActionExecuting(ActionExecutingContext context)
+    public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         if (!context.RouteData.Values.ContainsKey("id")
             || !int.TryParse((string?)context.RouteData.Values["id"], out int id))
@@ -23,14 +23,10 @@ public class CheckIfExistsAttribute : Attribute, IActionFilter
         if (book == null)
         {
             context.Result = new NotFoundObjectResult("The book is not found.");
+            return;
         }
-        else
-        {
-            context.HttpContext.Items.Add("book", book);
-        }
-    }
 
-    public void OnActionExecuted(ActionExecutedContext context)
-    {
+        context.HttpContext.Items.Add("book", book);
+        await next();  // Proceed to the action
     }
 }

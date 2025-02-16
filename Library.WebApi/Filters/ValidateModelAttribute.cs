@@ -5,8 +5,8 @@ public class ValidateModelAttribute<T> : Attribute, IActionFilter where T : clas
 {
     public void OnActionExecuting(ActionExecutingContext context)
     {
-        var param = context.ActionArguments.SingleOrDefault(p => p.Value is T);
-        if (param.Value == null)
+        var param = context.ActionArguments.FirstOrDefault(p => p.Value is T);
+        if (param.Key == null || param.Value == null)
         {
             context.Result = new BadRequestObjectResult("Model is null");
             return;
@@ -15,17 +15,18 @@ public class ValidateModelAttribute<T> : Attribute, IActionFilter where T : clas
         var validator = context.HttpContext.RequestServices.GetService<IValidator<T>>();
         if (validator == null)
         {
-            context.Result = new ObjectResult($"Validator for type {nameof(T)} is not exists")
-            {
-                StatusCode = 500
-            };
+            //context.Result = new ObjectResult($"Validator for type {nameof(T)} is not exists")
+            //{
+            //    StatusCode = 500
+            //};
             return;
         }
 
         var dto = (T)param.Value;
-        if (!validator.Validate(dto).IsValid)
+        var validationResult = validator.Validate(dto);
+        if (!validationResult.IsValid)
         {
-            context.Result = new BadRequestObjectResult("Model is not valid");
+            context.Result = new BadRequestObjectResult(validationResult.Errors);
         }
     }
 

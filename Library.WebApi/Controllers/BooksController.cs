@@ -50,10 +50,13 @@ public class BooksController : ControllerBase
     [ServiceFilter(typeof(CheckIfExistsAttribute))]
     public IActionResult GetBookById()
     {
-        var bookDto = _mapper.Map<DetailsBookDto>(HttpContext.Items["book"] as Book);
-        if (bookDto == null)
-            return StatusCode(500);
+        var book = HttpContext.Items["book"] as Book;
+        if (book == null)
+        {
+            return StatusCode(500, "Book not found in context.");
+        }
 
+        var bookDto = _mapper.Map<DetailsBookDto>(book);
         return Ok(bookDto);
     }
 
