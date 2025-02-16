@@ -1,11 +1,6 @@
 ﻿using Library.Domain.Contracts.Repositories;
 using Library.Domain.Contracts.Services;
 using Library.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Library.Business.Services;
 public class LibraryService : ILibraryService
@@ -39,6 +34,10 @@ public class LibraryService : ILibraryService
 
     public async Task<int> UpdateBookAsync(Book book)
     {
+        var existing = await _repository.GetBookByIdAsync(book.Id);
+        if (existing == null)
+            throw new InvalidOperationException("The book doesn't exist.");
+
         return await _repository.UpdateBookAsync(book);
     }
 }

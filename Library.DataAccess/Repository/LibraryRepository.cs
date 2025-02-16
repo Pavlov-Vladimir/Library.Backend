@@ -24,31 +24,27 @@ public class LibraryRepository : ILibraryRepository
 
     public async Task<int> CreateBookAsync(Book book)
     {
-        if (book == null)
-            return await Task.FromResult(-1);
+        if (book == null) throw new ArgumentNullException(nameof(book));
 
-        var bookEntry = _context.Entry<Book>(book);
         await _context.Books.AddAsync(book);
         await _context.SaveChangesAsync();
 
-        return await Task.FromResult(bookEntry.Entity.Id);
+        return book.Id;
     }
 
     public async Task<int> CreateReviewAsync(Review review)
     {
-        if (review == null)
-            return await Task.FromResult(-1);
+        if (review == null) throw new ArgumentNullException(nameof(review));
 
-        var reviewEntry = _context.Entry<Review>(review);
         await _context.Reviews.AddAsync(review);
         await _context.SaveChangesAsync();
 
-        return await Task.FromResult(reviewEntry.Entity.Id);
+        return review.Id;
     }
 
     public async Task DeleteBookAsync(int id)
     {
-        var book = await GetBookByIdAsync(id);
+        var book = await _context.Books.FindAsync(id);
         if (book != null)
         {
             _context.Books.Remove(book);
@@ -59,6 +55,7 @@ public class LibraryRepository : ILibraryRepository
     public async Task<ICollection<Book>> GetAllBooksAsync(OrderByProperty orderBy = OrderByProperty.Title)
     {
         var books = _context.Books
+            .AsNoTracking()
             .Include(b => b.Reviews)
             .Include(b => b.Ratings)
             .AsSplitQuery();
@@ -74,6 +71,7 @@ public class LibraryRepository : ILibraryRepository
     public async Task<Book?> GetBookByIdAsync(int bookId)
     {
         return await _context.Books
+            .AsNoTracking()
             .Include(b => b.Reviews)
             .Include(b => b.Ratings)
             .AsSplitQuery()
@@ -82,50 +80,32 @@ public class LibraryRepository : ILibraryRepository
 
     public async Task<ICollection<Book>> GetRecommendedAsync(string? genre = null)
     {
-        var books = await _context.Books
-            .Where(b => genre == null || b.Genre.ToLower().Contains(genre.ToLower()))
+        var query = _context.Books
+            .AsNoTracking()
             .Include(b => b.Reviews)
             .Include(b => b.Ratings)
             .AsSplitQuery()
-            .ToListAsync();
+            .AsQueryable();
 
-        return books
-            .OrderByDescending(b => b.Ratings
-                .Select(r => r.Score)
-                .DefaultIfEmpty(0)
-                .Average())
+        if (!string.IsNullOrWhiteSpace(genre))
+        {
+            query = query.Where(b => EF.Functions.ILike(b.Genre, $"%{genre}%"));
+        }
+
+        return await query
+            .OrderByDescending(b => b.Ratings.Average(r => (int?)r.Score) ?? 0)
             .Take(10)
-            .ToList();
-
-        // This query doesn't work as IQueryable !???
-        //var books = await _context.Books
-        //    .Where(b => genre == null || b.Genre.ToLower().Contains(genre.ToLower()))
-        //    .Include(b => b.Reviews)
-        //        .ThenInclude(r => r.Book)
-        //    .Include(b => b.Ratings)
-        //        .ThenInclude(r => r.Book)
-        //    .OrderByDescending(b => b.Ratings
-        //        .Select(r => r.Score)
-        //        .DefaultIfEmpty(0)
-        //        .Average())
-        //    .Take(10)
-        //    .ToListAsync();
-        //return books;
+            .ToListAsync();
     }
 
     public async Task<int> UpdateBookAsync(Book book)
     {
-        var existing = await GetBookByIdAsync(book.Id);
-        if (existing == null)
-            throw new InvalidOperationException("The book doesn't exist.");
+        if (book == null) throw new ArgumentNullException(nameof(book));
 
-        existing.Title = book.Title;
-        existing.Author = book.Author;
-        existing.Genre = book.Genre;
-        existing.Content = book.Content;
-        existing.Cover = book.Cover;
+        _context.Books.Update(book);
         await _context.SaveChangesAsync();
 
-        return existing.Id;
+        return book.Id;
     }
+
 }
