@@ -13,46 +13,46 @@ public class LibraryRepository : ILibraryRepository
         _context = context;
     }
 
-    public async Task AddRatingAsync(Rating rating)
+    public async Task AddRatingAsync(Rating rating, CancellationToken ct = default)
     {
         if (rating == null)
             return;
 
-        await _context.Ratings.AddAsync(rating);
-        await _context.SaveChangesAsync();
+        await _context.Ratings.AddAsync(rating, ct);
+        await _context.SaveChangesAsync(ct);
     }
 
-    public async Task<int> CreateBookAsync(Book book)
+    public async Task<int> CreateBookAsync(Book book, CancellationToken ct = default)
     {
         if (book == null) throw new ArgumentNullException(nameof(book));
 
-        await _context.Books.AddAsync(book);
-        await _context.SaveChangesAsync();
+        await _context.Books.AddAsync(book, ct);
+        await _context.SaveChangesAsync(ct);
 
         return book.Id;
     }
 
-    public async Task<int> CreateReviewAsync(Review review)
+    public async Task<int> CreateReviewAsync(Review review, CancellationToken ct = default)
     {
         if (review == null) throw new ArgumentNullException(nameof(review));
 
-        await _context.Reviews.AddAsync(review);
-        await _context.SaveChangesAsync();
+        await _context.Reviews.AddAsync(review, ct);
+        await _context.SaveChangesAsync(ct);
 
         return review.Id;
     }
 
-    public async Task DeleteBookAsync(int id)
+    public async Task DeleteBookAsync(int id, CancellationToken ct = default)
     {
-        var book = await _context.Books.FindAsync(id);
+        var book = await _context.Books.FindAsync(id, ct);
         if (book != null)
         {
             _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
         }
     }
 
-    public async Task<ICollection<Book>> GetAllBooksAsync(OrderByProperty orderBy = OrderByProperty.Title)
+    public async Task<ICollection<Book>> GetAllBooksAsync(OrderByProperty orderBy = OrderByProperty.Title, CancellationToken ct = default)
     {
         var books = _context.Books
             .AsNoTracking()
@@ -62,23 +62,23 @@ public class LibraryRepository : ILibraryRepository
 
         return orderBy switch
         {
-            OrderByProperty.Author => await books.OrderBy(b => b.Author).ToListAsync(),
-            OrderByProperty.Title => await books.OrderBy(b => b.Title).ToListAsync(),
+            OrderByProperty.Author => await books.OrderBy(b => b.Author).ToListAsync(ct),
+            OrderByProperty.Title => await books.OrderBy(b => b.Title).ToListAsync(ct),
             _ => throw new ArgumentException("Invalid sort parameter.")
         };
     }
 
-    public async Task<Book?> GetBookByIdAsync(int bookId)
+    public async Task<Book?> GetBookByIdAsync(int bookId, CancellationToken ct = default)
     {
         return await _context.Books
             .AsNoTracking()
             .Include(b => b.Reviews)
             .Include(b => b.Ratings)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(x => x.Id == bookId);
+            .FirstOrDefaultAsync(x => x.Id == bookId, ct);
     }
 
-    public async Task<ICollection<Book>> GetRecommendedAsync(string? genre = null)
+    public async Task<ICollection<Book>> GetRecommendedAsync(string? genre = null, CancellationToken ct = default)
     {
         var query = _context.Books
             .AsNoTracking()
@@ -95,15 +95,15 @@ public class LibraryRepository : ILibraryRepository
         return await query
             .OrderByDescending(b => b.Ratings.Average(r => (int?)r.Score) ?? 0)
             .Take(10)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
-    public async Task<int> UpdateBookAsync(Book book)
+    public async Task<int> UpdateBookAsync(Book book, CancellationToken ct = default)
     {
         if (book == null) throw new ArgumentNullException(nameof(book));
 
         _context.Books.Update(book);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
 
         return book.Id;
     }

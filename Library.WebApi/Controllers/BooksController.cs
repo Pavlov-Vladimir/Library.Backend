@@ -22,8 +22,8 @@ public class BooksController : ControllerBase
     public async Task<IActionResult> GetBooks([FromQuery] string? order)
     {
         var books = Enum.TryParse<OrderByProperty>(order, true, out OrderByProperty orderBy)
-            ? await _dataProvider.GetBooksAsync(orderBy)
-            : await _dataProvider.GetBooksAsync();
+            ? await _dataProvider.GetBooksAsync(orderBy, HttpContext.RequestAborted)
+            : await _dataProvider.GetBooksAsync(ct: HttpContext.RequestAborted);
 
         var bookDtos = _mapper.Map<List<GetBookDto>>(books);
         if (bookDtos == null)
@@ -36,7 +36,7 @@ public class BooksController : ControllerBase
     [Route("/api/recommended")]
     public async Task<IActionResult> GetRecommended([FromQuery] string? genre = null)
     {
-        var books = await _dataProvider.GetRecommendedAsync(genre);
+        var books = await _dataProvider.GetRecommendedAsync(genre, HttpContext.RequestAborted);
 
         var bookDtos = _mapper.Map<List<GetBookDto>>(books);
         if (bookDtos == null)
@@ -70,7 +70,7 @@ public class BooksController : ControllerBase
         if (key != secretKey)
             return BadRequest();
 
-        await _libraryService.DeleteBookAsync(id);
+        await _libraryService.DeleteBookAsync(id, HttpContext.RequestAborted);
         return NoContent();
     }
 
@@ -85,10 +85,10 @@ public class BooksController : ControllerBase
 
         if (book.Id == default)
         {
-            var bookId = await _libraryService.AddBookAsync(book);
+            var bookId = await _libraryService.AddBookAsync(book, HttpContext.RequestAborted);
             return Created("id", new { id = bookId });
         }
-        await _libraryService.UpdateBookAsync(book);
+        await _libraryService.UpdateBookAsync(book, HttpContext.RequestAborted);
         return Ok(new { id = book.Id });
     }
 
@@ -101,7 +101,7 @@ public class BooksController : ControllerBase
         if (review == null)
             return StatusCode(500);
 
-        var reviewId = await _libraryService.AddReviewAsync(review);
+        var reviewId = await _libraryService.AddReviewAsync(review, HttpContext.RequestAborted);
         return Ok(new { id = reviewId });
     }
 
@@ -114,7 +114,7 @@ public class BooksController : ControllerBase
         if (rating == null)
             return StatusCode(500);
 
-        await _libraryService.AddRatingAsync(rating);
+        await _libraryService.AddRatingAsync(rating, HttpContext.RequestAborted);
         return Ok();
     }
 }

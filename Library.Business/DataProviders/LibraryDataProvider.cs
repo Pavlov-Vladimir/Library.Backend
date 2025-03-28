@@ -13,18 +13,18 @@ public class LibraryDataProvider : ILibraryDataProvider
         _repository = repository;
     }
 
-    public async Task<Book?> GetBookByIdAsync(int bookId)
+    public async Task<Book?> GetBookByIdAsync(int bookId, CancellationToken ct = default)
     {
-        return await _repository.GetBookByIdAsync(bookId);
+        return await _repository.GetBookByIdAsync(bookId, ct);
     }
 
-    public async Task<ICollection<Book>> GetBooksAsync(OrderByProperty orderBy)
+    public async Task<ICollection<Book>> GetBooksAsync(OrderByProperty orderBy, CancellationToken ct = default)
     {
-        return await _repository.GetAllBooksAsync(orderBy);
+        return await _repository.GetAllBooksAsync(orderBy, ct);
     }
 
-    public async Task<ICollection<Book>> GetRecommendedAsync(string? genre)
+    public async Task<ICollection<Book>> GetRecommendedAsync(string? genre, CancellationToken ct = default)
     {
-        return await _repository.GetRecommendedAsync(genre);
+        return await _repository.GetRecommendedAsync(genre, ct);
     }
 }

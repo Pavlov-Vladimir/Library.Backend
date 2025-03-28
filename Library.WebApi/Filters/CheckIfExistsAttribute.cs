@@ -12,6 +12,8 @@ public class CheckIfExistsAttribute : ActionFilterAttribute
 
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        var cansellationToken = context.HttpContext.RequestAborted;
+
         if (!context.RouteData.Values.ContainsKey("id")
             || !int.TryParse((string?)context.RouteData.Values["id"], out int id))
         {
@@ -19,7 +21,7 @@ public class CheckIfExistsAttribute : ActionFilterAttribute
             return;
         }
 
-        var book = await _dataProvider.GetBookByIdAsync(id);
+        var book = await _dataProvider.GetBookByIdAsync(id, cansellationToken);
         if (book == null)
         {
             context.Result = new NotFoundObjectResult("The book is not found.");
