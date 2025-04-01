@@ -17,13 +17,14 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:5000;https://+:5001
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=pg_db;Port=5432;Database=lib_db;Username=postgres;Password=123;IntegratedSecurity=true;Pooling=true;
+      - ConnectionStrings__DefaultConnection=Server=pg_db;Port=5432;Database=lib_db;Username=postgres;Password=123;Pooling=true;
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=SecurePassword
     networks:
       - library-network
     depends_on:
-      - pg_db
+      pg_db:
+        condition: service_healthy
     restart: on-failure
     
   pg_db:
@@ -39,6 +40,10 @@ services:
     container_name: library_postgres_db
     networks:
       - library-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
 
 volumes:
   db_data:
