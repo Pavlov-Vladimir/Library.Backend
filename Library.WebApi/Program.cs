@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +19,15 @@ services.AddHttpLogging(options =>
         HttpLoggingFields.ResponseStatusCode;
     //options.MediaTypeOptions.AddText("application/javascript");
 });
+
+services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = configuration.GetConnectionString("Redis");
+    options.InstanceName = "Library_";
+});
+
+//services.AddScoped<IRedisCacheService, RedisCacheMPService>();
+services.AddScoped<IRedisCacheService, RedisCacheJSONService>();
 
 services.AddControllers();
 
